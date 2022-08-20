@@ -1,6 +1,5 @@
 import { client, Options, ChatUserstate } from 'tmi.js';
 import OBSWebSocket from 'obs-websocket-js';
-import PanZoomTilt from './PanZoomTilt';
 import ObsView from './ObsView';
 
 const words_regex = /!([A-Za-z]+)/gm;
@@ -45,9 +44,8 @@ export async function twitchObsManager(config: Config) {
     chat.on('connected', onConnectedHandler);
     chat.on('disconnected', onDisconnectedHandler);
     const { obsWebSocketVersion, negotiatedRpcVersion } = await obs.connect(
-      config.obs.url,
-      config.obs.password
-    );
+      config.obs.url
+    ,config.obs.password);
     console.log(
       `Connected to server ${obsWebSocketVersion} (using RPC ${negotiatedRpcVersion})`
     );
@@ -56,11 +54,12 @@ export async function twitchObsManager(config: Config) {
     obs_view = new ObsView(obs);
     // add views to OBS View
     config.views.map((e) => obs_view.addAlias(e.name, e.alias));
-
     await chat.connect();
     console.log('created twitch connecton');
-  } catch (e) {
-    throw new Error(`Unable to connect to OBS or Twitch\n${e}`);
+  } catch (e:any) {
+    console.log(config.obs)
+    console.log(e)
+    throw new Error("error connecting");
   }
   /** functions to handle
    ***chat - passes message to bot
@@ -179,15 +178,16 @@ export async function twitchObsManager(config: Config) {
         } else if (context.subscriber) {
           // command comes from subsriber
           console.log('parsing subscriber command');
+          chat.say(channel, "Thanks for being a subscriber and supporting the stream! Switching view!")
           parseSubscriberCommand(str, match, matches);
         } else {
           // not a subscriber
           console.log('parsing non-subscriber command');
-          // sayForSubs(
-          //   channel,
-          //   context.username || context['display-name'] || context
-          // );
-          parseSubscriberCommand(str, match, matches);
+sayForSubs(
+            channel,
+            context.username || context['display-name'] || context
+          );
+          // parseSubscriberCommand(str, match, matches);
         }
       });
     } catch (e) {
@@ -280,8 +280,7 @@ export async function twitchObsManager(config: Config) {
     console.log('say for subs executing...');
     chat.say(
       channel,
-      `This command is reserved for Subscribers user ${user}. Apologies, but you can subscribe below!`
-    );
+      `Subscribers can switch the Cameras, please subscribe to support the stream and change the cameras.'
   }
   // log restart proocess
   const logRestart = () => {

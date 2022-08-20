@@ -33,7 +33,9 @@ async function twitchObsManager(config) {
         console.log('created twitch connecton');
     }
     catch (e) {
-        throw new Error(`Unable to connect to OBS or Twitch\n${e}`);
+        console.log(config.obs);
+        console.log(e);
+        throw new Error("error connecting");
     }
     /** functions to handle
      ***chat - passes message to bot
@@ -132,16 +134,14 @@ async function twitchObsManager(config) {
                 else if (context.subscriber) {
                     // command comes from subsriber
                     console.log('parsing subscriber command');
+                    chat.say(channel, "Thanks for being a subscriber and supporting the stream! Switching view!");
                     parseSubscriberCommand(str, match, matches);
                 }
                 else {
                     // not a subscriber
                     console.log('parsing non-subscriber command');
-                    // sayForSubs(
-                    //   channel,
-                    //   context.username || context['display-name'] || context
-                    // );
-                    parseSubscriberCommand(str, match, matches);
+                    sayForSubs(channel, context.username || context['display-name'] || context);
+                    // parseSubscriberCommand(str, match, matches);
                 }
             });
         }
@@ -225,7 +225,7 @@ async function twitchObsManager(config) {
     // log prevent non-subscribers from PTZ and feed
     async function sayForSubs(channel, user) {
         console.log('say for subs executing...');
-        chat.say(channel, `This command is reserved for Subscribers user ${user}. Apologies, but you can subscribe below!`);
+        chat.say(channel, `This command is reserved for subscribers. Apologies, but you can subscribe on this page!`);
     }
     // log restart proocess
     const logRestart = () => {

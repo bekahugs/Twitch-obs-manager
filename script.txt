@@ -1,0 +1,2 @@
+npx nx build twitch-obs-manager
+node .\dist\packages\twitch-obs-manager\src\index.js
